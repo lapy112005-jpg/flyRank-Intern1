@@ -1,14 +1,16 @@
-import express from "express"
+import express from "express";
 
-const app = express()
+const app = express();
 
-app.use(express.json())
+app.use(express.json());
 
-app.get("/" , (req,res,next)=>{
-    res.json({message:"hello world"})
-})
+app.get("/", (req, res, next) => {
+  res.json({ name: "Task API", version: "1.0", endpoints: ["/tasks"] });
+});
 
-app.listen(3000 , ()=>{
-    console.log("server run on port 3000🚄🚄");
-    
-})
+app.get("/health", (req, res, next) => {
+  res.json({ status: "ok" });
+});
+app.listen(3000, () => {
+  console.log("server run on port 3000🚄🚄");
+});
