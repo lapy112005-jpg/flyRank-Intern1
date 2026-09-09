@@ -18,21 +18,33 @@ app.get("/health", (req, res, next) => {
 });
 
 app.get("/tasks", (req, res, next) => {
-  res.json({ tasks: memory.map((ele)=>{
-    return ele
-  }) });
+  res.json({
+    tasks: memory.map((ele) => {
+      return ele;
+    }),
+  });
 });
 
 app.get("/tasks/:id", (req, res, next) => {
-  const findTask = memory.find((ele)=>{
-    return ele.id == req.params.id 
-  })
+  const findTask = memory.find((ele) => {
+    return ele.id == req.params.id;
+  });
   if (!findTask) {
-   res.status(404).json({ error: "Task 99 not found" })
+    res.status(404).json({ error: "Task 99 not found" });
   }
-  res.json({task:findTask})
+  res.json({ task: findTask });
+});
+
+app.post("/task", (req, res, next) => {
+  if (!req.body.title  || !req.body.title.trim()) {
+    return res.status(400).json({ "error": "Title is required" })
+  }
+  const newId = memory.length+1
+  const newTask ={id:newId , title:req.body.title , done:false}
+  memory.push(newTask)
+  res.status(201).json({task:newTask})
 });
 
 app.listen(3000, () => {
-  console.log("server run on port 3000🚄🚄");
+  console.log("server run on port 3000");
 });
