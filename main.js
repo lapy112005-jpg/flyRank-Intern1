@@ -36,13 +36,53 @@ app.get("/tasks/:id", (req, res, next) => {
 });
 
 app.post("/task", (req, res, next) => {
-  if (!req.body.title  || !req.body.title.trim()) {
-    return res.status(400).json({ "error": "Title is required" })
+  if (!req.body.title || !req.body.title.trim()) {
+    return res.status(400).json({ error: "Title is required" });
   }
-  const newId = memory.length+1
-  const newTask ={id:newId , title:req.body.title , done:false}
-  memory.push(newTask)
-  res.status(201).json({task:newTask})
+  const newId = memory.length + 1;
+  const newTask = { id: newId, title: req.body.title, done: false };
+  memory.push(newTask);
+  res.status(201).json({ task: newTask });
+});
+
+app.put("/task/:id", (req, res) => {
+  const findTask = memory.find((ele) => ele.id == req.params.id);
+
+  if (!findTask) {
+    return res.status(404).json({ error: `Task ${req.params.id} not found` });
+  }
+
+  const hasTitle = req.body.title !== undefined;
+  const hasDone = req.body.done !== undefined;
+
+  if (!hasTitle && !hasDone) {
+    return res.status(400).json({ error: "Title or done field is required" });
+  }
+
+  if (hasTitle && !req.body.title.trim()) {
+    return res.status(400).json({ error: "Title cannot be empty" });
+  }
+
+  if (hasTitle) {
+    findTask.title = req.body.title.trim();
+  }
+
+  if (hasDone) {
+    findTask.done = req.body.done;
+  }
+
+  res.json(findTask);
+});
+
+app.delete("/tasks/:id", (req, res) => {
+  const index = memory.findIndex((ele) => ele.id == req.params.id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: `Task ${req.params.id} not found` });
+  }
+
+  memory.splice(index, 1);
+  res.status(204).send();
 });
 
 app.listen(3000, () => {
