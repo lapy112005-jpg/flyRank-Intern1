@@ -2,6 +2,12 @@ import express from "express";
 
 const app = express();
 
+import swaggerUi from 'swagger-ui-express';
+import openApiDocumentation from './openapi.json' with { type: 'json' };
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
+
+
 app.use(express.json());
 const memory = [
   { id: 1, title: "wake up early", done: true },
@@ -30,12 +36,12 @@ app.get("/tasks/:id", (req, res, next) => {
     return ele.id == req.params.id;
   });
   if (!findTask) {
-    res.status(404).json({ error: "Task 99 not found" });
+    res.status(404).json({ error: "Task not found" });
   }
   res.json({ task: findTask });
 });
 
-app.post("/task", (req, res, next) => {
+app.post("/tasks", (req, res, next) => {
   if (!req.body.title || !req.body.title.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
