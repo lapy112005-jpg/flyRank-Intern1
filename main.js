@@ -66,7 +66,7 @@ app.post("/tasks", (req, res, next) => {
 });
 
 app.put("/task/:id", (req, res) => {
-  const findTask = memory.find((ele) => ele.id == req.params.id);
+  const findTask = db.prepare("select * from tasks where id = ?").get(req.params.id)
 
   if (!findTask) {
     return res.status(404).json({ error: `Task ${req.params.id} not found` });
@@ -82,26 +82,21 @@ app.put("/task/:id", (req, res) => {
   if (hasTitle && !req.body.title.trim()) {
     return res.status(400).json({ error: "Title cannot be empty" });
   }
-
-  if (hasTitle) {
-    findTask.title = req.body.title.trim();
-  }
-
-  if (hasDone) {
-    findTask.done = req.body.done;
-  }
-
-  res.json(findTask);
+  
+  const update = db.prepare("update tasks set title=? , done=? where id=?").run(req.body.title , req.body.done , req.params.id)
+  const updatedTask = db.prepare("select * from tasks where id=?").get(req.params.id)
+  res.status(201).json({updatedTask})
+  
 });
 
 app.delete("/tasks/:id", (req, res) => {
-  const index = memory.findIndex((ele) => ele.id == req.params.id);
+  const findTask = db.prepare("select * from tasks where id=?").get(req.params.id)
 
-  if (index === -1) {
+  if (!findTask) {
     return res.status(404).json({ error: `Task ${req.params.id} not found` });
   }
 
-  memory.splice(index, 1);
+  db.prepare("delete from tasks where id=?").run(req.params.id)
   res.status(204).send();
 });
 
