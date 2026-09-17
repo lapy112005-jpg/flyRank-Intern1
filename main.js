@@ -1,4 +1,5 @@
 import express from "express";
+import Database from "better-sqlite3";
 
 const app = express();
 
@@ -7,6 +8,25 @@ import openApiDocumentation from './openapi.json' with { type: 'json' };
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 
+const db = new Database("tasks.db");
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    done BOOLEAN NOT NULL DEFAULT 0
+  )
+`);
+
+const countStmt = db.prepare("SELECT COUNT(*) AS count FROM tasks");
+const taskCount = countStmt.get().count;
+
+if (taskCount === 0) {
+  const insertStmt = db.prepare("INSERT INTO tasks (title, done) VALUES (?, ?)");
+  insertStmt.run("wake up early", 1);
+  insertStmt.run("go to school", 1);
+  insertStmt.run("pray", 0);
+  console.log("Database initialized with 3 default tasks.");
+}
 
 app.use(express.json());
 const memory = [
